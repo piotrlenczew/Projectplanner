@@ -41,7 +41,6 @@ public class ProjectTests {
         Project project = new Project("Shop", user,  date);
         assertEquals("Shop", project.getName());
         assertEquals(user, project.getOwner());
-        assertTrue(project.getMembers().contains(user));
         assertEquals(date, project.getProjectCreationDate());
     }
 

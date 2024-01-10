@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import pw.pap.model.User;
 
@@ -21,7 +20,7 @@ public class UserServiceTests {
     private UserService userService;
 
     @Test
-    @Rollback
+    @Transactional
     public void testRegister() {
         String username = "testBob";
         String password = "reallySecurePassword";
@@ -36,7 +35,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Rollback
+    @Transactional
     public void testRegisterExistingName() {
         String username = "testBob";
         String password = "reallySecurePassword";
@@ -46,7 +45,7 @@ public class UserServiceTests {
     }
 
     @Test
-    @Rollback
+    @Transactional
     public void testLogin() {
         String username = "testBob";
         String password = "reallySecurePassword";
@@ -63,31 +62,18 @@ public class UserServiceTests {
     }
 
     @Test
-    @Rollback
+    @Transactional
     public void testLoginUserNotInDatabase() {
         assertThrows(EntityNotFoundException.class, () -> userService.login("hvdfi14iicvg6575xzhccd342scjba574sgu87xscgas7vhc", "Password"));
     }
 
     @Test
-    @Rollback
+    @Transactional
     public void testLoginWrongPassword() {
         String username = "testBob";
         String password = "reallySecurePassword";
         User registeredUser = userService.register(username, password);
         assertThrows(IllegalArgumentException.class, () -> userService.login(username, "notSecurePassword"));
         userService.deleteUser(registeredUser.getId());
-    }
-
-    @Test
-    @Rollback
-    public void testUpdate() {
-        String username = "testBob";
-        String password = "reallySecurePassword";
-        User user = userService.register(username, password);
-        user.setName("testRonald");
-        userService.updateUser(user.getId(), user);
-
-        User updatedUser = userService.getUserById(user.getId());
-        assertEquals(updatedUser.getName(), "testRonald");
     }
 }

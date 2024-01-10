@@ -13,14 +13,15 @@ const Register = ({ onRegister }) => {
         axios.post("/api/users/register", newUser)
             .then(response => {
                 alert('User added successfully!'); // Notify user
-                onRegister(response.data);
+                alert(response.data.id)
+                onRegister(newUserName, newUserPassword);
                 navigate('/home'); // Navigate to the HomePage
             })
             .catch(error => {
-                if (error.response && error.response.status === 409) {
-                    alert("User with this name exists");
+                // Check if the error is due to the username being taken
+                if (error.response && error.response.status === 500) { // Assuming 409 status code for conflict
+                    alert("Username taken");
                 } else {
-                    alert("Error adding user");
                     console.error("Error adding user:", error);
                 }
             });
@@ -28,34 +29,28 @@ const Register = ({ onRegister }) => {
 
     return (
         <div className="flex justify-center items-center h-screen">
-            <div className="w-full max-w-xs flex flex-col items-center">
-                <h2 className="text-3xl mb-2">Register</h2>
-                <form onSubmit={handleRegisterUser} className="w-full flex flex-col">
-                    <input
-                        className="myinput mb-3"
-                        autoFocus
-                        required
-                        type="text"
-                        placeholder="Username"
-                        value={newUserName}
-                        onChange={(e) => setNewUserName(e.target.value)}
-                    />
-                    <input
-                        className="myinput mb-3"
-                        required
-                        type="password"
-                        placeholder="Password"
-                        value={newUserPassword}
-                        onChange={(e) => setNewUserPassword(e.target.value)}
-                    />
-                    <button
-                        type="submit"
-                        className="loginbutton loginbutton-submit"
-                    >
-                        Register
-                    </button>
-                </form>
-            </div>
+            <form onSubmit={handleRegisterUser} className="flex flex-col items-center mb-4">
+                <input
+                    type="text"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    placeholder="Username"
+                    className="myinput mb-2" // Add margin-bottom for spacing
+                />
+                <input
+                    type="password"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    placeholder="Password"
+                    className="myinput mb-2" // Add margin-bottom for spacing
+                />
+                <button
+                    type="submit"
+                    className="mybutton"
+                >
+                    Register
+                </button>
+            </form>
         </div>
     );
 };
