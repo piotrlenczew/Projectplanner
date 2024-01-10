@@ -27,7 +27,8 @@ public class TaskController {
             @RequestParam String description,
             @RequestParam Long creatorId,
             @RequestParam Long projectId,
-            @RequestParam String taskDeadline
+            @RequestParam String taskDeadline,
+            @RequestHeader(name = "Authorization") String token
     ) {
         try {
             User creator = new User(); // Assuming you have a method to get the user by ID in the UserService
@@ -48,20 +49,20 @@ public class TaskController {
 
 
     @GetMapping("/{taskId}")
-    public ResponseEntity<Task> getTask(@PathVariable Long taskId) {
+    public ResponseEntity<Task> getTask(@PathVariable Long taskId, @RequestHeader(name = "Authorization") String token) {
         return taskService.getTaskById(taskId)
                 .map(task -> new ResponseEntity<>(task, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Iterable<Task>> getAllTasks() {
+    public ResponseEntity<Iterable<Task>> getAllTasks(@RequestHeader(name = "Authorization") String token) {
         Iterable<Task> tasks = taskService.getAllTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
     @PutMapping("/update/{taskId}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
+    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask, @RequestHeader(name = "Authorization") String token) {
         try {
             Task updated = taskService.updateTask(taskId, updatedTask);
             return new ResponseEntity<>(updated, HttpStatus.OK);
@@ -71,7 +72,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId, @RequestHeader(name = "Authorization") String token) {
         try {
             taskService.deleteTask(taskId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -81,7 +82,7 @@ public class TaskController {
     }
 
     @PostMapping("/assignUser")
-    public ResponseEntity<Void> assignUserToTask(@RequestParam Long taskId, @RequestParam Long userId) {
+    public ResponseEntity<Void> assignUserToTask(@RequestParam Long taskId, @RequestParam Long userId, @RequestHeader(name = "Authorization") String token) {
         try {
             taskService.assignUserToTask(taskId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -91,7 +92,7 @@ public class TaskController {
     }
 
     @PostMapping("/removeUser")
-    public ResponseEntity<Void> removeUserFromTask(@RequestParam Long taskId, @RequestParam Long userId) {
+    public ResponseEntity<Void> removeUserFromTask(@RequestParam Long taskId, @RequestParam Long userId, @RequestHeader(name = "Authorization") String token) {
         try {
             taskService.removeUserFromTask(taskId, userId);
             return new ResponseEntity<>(HttpStatus.OK);
