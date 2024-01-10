@@ -70,6 +70,9 @@ public class UserController {
 
     @PutMapping("/update/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User updatedUser, @RequestHeader(name = "Authorization") String token) {
+        if(!userAuthenticationProvider.validateToken(token).isAuthenticated()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         User user = userService.updateUser(userId, updatedUser);
         if (user != null) {
             return new ResponseEntity<>(user, HttpStatus.OK);
@@ -80,6 +83,9 @@ public class UserController {
 
     @DeleteMapping("/delete/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId, @RequestHeader(name = "Authorization") String token) {
+        if(!userAuthenticationProvider.validateToken(token).isAuthenticated()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         try {
             userService.deleteUser(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
