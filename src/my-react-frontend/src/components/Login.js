@@ -24,22 +24,27 @@ function Login({ onLogin }) {
             };
 
             const response = await axios.post("/api/users/login", requestBody);
-            //alert(response.data);
-            //alert(response.status)
+            alert(response.data);
             if (response.status === 200) {
                 if (response.data)
                 {
-                    //alert(response.data.id)
-                    onLogin(response.data); // Update App state if authentication is successful
+                    onLogin(username, password); // Update App state if authentication is successful
                     navigate('/home'); // Navigate to HomePage
                 }
+                else
+                {
+                    setPassword('');
+                    alert('Wrong Password');
+                }
+
             } else {
                 throw new Error('Authentication failed'); // Rzuć wyjątek, jeśli autoryzacja nie powiedzie się
             }
         } catch (error) {
             console.error('Login error:', error);
-            if (error.response && error.response.status === 404) {
-                setLoginError("User not found"); // Ustaw błąd dla błędnej nazwy użytkownika
+            if (error.response && error.response.status === 500) {
+                alert('Wrong Username');
+                setLoginError('Internal Server Error'); // Ustaw błąd dla błędów serwera
             } else {
                 setLoginError('An error occurred during login'); // Ustaw błąd dla innych błędów
             }
@@ -50,20 +55,16 @@ function Login({ onLogin }) {
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="w-full max-w-xs flex flex-col items-center">
-                <h2 className="text-3xl mb-2">Login</h2>
-                <form onSubmit={handleLoginSubmit} className="w-full flex flex-col mb-8">
+                <form onSubmit={handleLoginSubmit} className="w-full flex flex-col">
                     <input
-                        className="myinput mb-2"
-                        autoFocus
-                        required
+                        className="px-3 py-2 mb-3 border rounded shadow appearance-none text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         type="text"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
                     <input
-                        className="myinput mb-2"
-                        required
+                        className="px-3 py-2 mb-3 border rounded shadow appearance-none text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         type="password"
                         placeholder="Password"
                         value={password}
@@ -71,17 +72,17 @@ function Login({ onLogin }) {
                     />
                     <button
                         type="submit"
-                        className="loginbutton loginbutton-submit"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4"
                     >
                         Login
                     </button>
 
                 </form>
                 <button
-                    className="loginbutton loginbutton-other w-full"
+                    className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     onClick={handleRegisterClick}
                 >
-                    Register here
+                    Register
                 </button>
             </div>
         </div>

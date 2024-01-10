@@ -1,6 +1,5 @@
 package pw.pap.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
@@ -31,19 +30,27 @@ public class TaskService {
         this.projectRepository = projectRepository;
     }
 
-    public Task createTask(String title, Long creatorId, Long projectId) {
-        Project project = projectRepository.findById(projectId)
+    public Task createTask(String title, String description, User creator, Project project, List<User> assignees, LocalDateTime taskDeadline) {
+        Project foundProject = projectRepository.findById(project.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Project not found"));
 
-        User creator = userRepository.findById(creatorId)
+        User user = userRepository.findById(creator.getId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (!project.getMembers().contains(creator)) {
             throw new IllegalArgumentException("Member not found");
         }
 
+        for (User assignee : assignees){
+            user = userRepository.findById(assignee.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            if (!project.getMembers().contains(user)) {
+                throw new IllegalArgumentException("Member not found");
+            }
+        }
         LocalDateTime currentDate = LocalDateTime.now();
-        Task task = new Task(title, currentDate, creator, project);
+        Task task = new Task(title, description, currentDate, taskDeadline, assignees, creator, foundProject);
         return taskRepository.save(task);
     }
 
@@ -59,22 +66,6 @@ public class TaskService {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
-        String newTitle = updatedTask.getTitle();
-        if(newTitle.isBlank()){
-            throw new IllegalArgumentException("Task title cannot be empty");
-        }
-        existingTask.setTitle(newTitle);
-
-        String newDescription = updatedTask.getDescription();
-        existingTask.setDescription(newDescription);
-
-        LocalDateTime newDeadline = updatedTask.getTaskDeadline();
-        LocalDateTime currentDate = LocalDateTime.now();
-        if (!newDeadline.isAfter(currentDate)) {
-            throw new IllegalArgumentException("New deadline must be after current time");
-        }
-        existingTask.setTaskDeadline(newDeadline);
-
         taskRepository.deleteById(taskId);
         updatedTask.setId(taskId);
         return taskRepository.save(updatedTask);
@@ -85,6 +76,15 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
         Project project = task.getProject();
+        project.getTasks().remove(task);
+
+        User creator = task.getCreator();
+        creator.getCreatedTasks().remove(task);
+
+        List<User> assignees = task.getAssignees();
+        for (User assignee : assignees) {
+            assignee.getAssignedTasks().remove(task);
+        }
 
         taskRepository.deleteById(taskId);
     }
@@ -103,6 +103,7 @@ public class TaskService {
         else {
             task.getAssignees().add(user);
             taskRepository.save(task);
+            user.getAssignedTasks().add(task);
             userRepository.save(user);
         }
     }
@@ -116,6 +117,7 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         task.getAssignees().remove(user);
+        user.getAssignedTasks().remove(task);
         taskRepository.save(task);
     }
 }

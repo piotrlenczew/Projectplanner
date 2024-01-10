@@ -6,31 +6,27 @@ import HomePage from './components/HomePage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState();
+    const [userCredentials, setUserCredentials] = useState({ username: '', password: '' });
 
-    const handleLogin = (user) => {
-        setUser(user);
+    const handleLogin = (username, password) => {
+        setUserCredentials({ username, password });
         setIsLoggedIn(true);
     };
 
-    const handleRegister = (user) => {
-        setUser(user);
-        //alert(user.id);
-        //alert(user.name);
+    const handleRegister = (username, password) => {
+        setUserCredentials({ username, password });
         setIsLoggedIn(true);
     };
 
     return (
-        <div className="bg-custom-background">
-            <Router>
-                <Routes>
-                    <Route path="/" element={<Navigate to="/login"/>}/>
-                    <Route path="/login" element={<Login onLogin={handleLogin}/>}/>
-                    <Route path="/register" element={<Register onRegister={handleRegister}/>}/>
-                    <Route path="/home" element={isLoggedIn ? <HomePage user={user}/> : <Navigate to="/login"/>}/>
-                </Routes>
-            </Router>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<Login onLogin={handleLogin} />} />
+                <Route path="/register" element={<Register onRegister={handleRegister} />} />
+                <Route path="/home" element={isLoggedIn ? <HomePage userCredentials={userCredentials} /> : <Navigate to="/login" />} />
+            </Routes>
+        </Router>
     );
 }
 

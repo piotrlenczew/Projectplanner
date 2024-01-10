@@ -7,21 +7,12 @@
         @apply overflow-y-auto overflow-x-hidden max-h-[calc(100vh-150px)] w-full;
     }
     .mylist-entry {
-        @apply bg-custom-blue shadow-md flex items-center justify-between rounded-md w-full mr-2 mb-2 p-4 hover:bg-custom-blue-hov transition duration-150 ease-in-out;
+        @apply bg-custom-blue shadow-md flex items-center justify-between rounded-md w-full mr-2 mb-2 p-4 hover:w-[calc(100%-0.75rem)] hover:ml-3;
     }
     .myinput {
-        @apply rounded border border-custom-myinput-bor p-2;
+        @apply bg-custom-lightgray rounded border border-custom-lightgray mr-2 mb-2 p-2;
     }
     .mybutton {
         @apply bg-custom-gray hover:bg-pink-600 text-white rounded px-3 py-2;
-    }
-    .loginbutton {
-        @apply text-white font-bold rounded p-2;
-    }
-    .loginbutton-submit {
-        @apply bg-blue-500 hover:bg-blue-700;
-    }
-    .loginbutton-other {
-        @apply bg-gray-300 text-gray-800 hover:bg-gray-400;
     }
 }

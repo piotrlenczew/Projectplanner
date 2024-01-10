@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import pw.pap.api.dto.TaskCreateDTO;
 import pw.pap.model.Task;
 import pw.pap.model.User;
 import pw.pap.model.Project;
@@ -23,10 +22,24 @@ public class TaskController {
     private TaskService taskService;
 
     @PostMapping("/create")
-    public ResponseEntity<Task> createTask(@RequestParam TaskCreateDTO taskCreateDTO) {
+    public ResponseEntity<Task> createTask(
+            @RequestParam String title,
+            @RequestParam String description,
+            @RequestParam Long creatorId,
+            @RequestParam Long projectId,
+            @RequestParam String taskDeadline
+    ) {
         try {
+            User creator = new User(); // Assuming you have a method to get the user by ID in the UserService
+            creator.setId(creatorId);
 
-            Task createdTask = taskService.createTask(taskCreateDTO.getTitle(), taskCreateDTO.getCreatorId(), taskCreateDTO.getProjectId());
+            Project project = new Project(); // Assuming you have a method to get the project by ID in the ProjectService
+            project.setId(projectId);
+
+            // Additional parameter: List<User> assignees (empty list for now)
+            List<User> assignees = new ArrayList<>();
+
+            Task createdTask = taskService.createTask(title, description, creator, project, assignees, LocalDateTime.parse(taskDeadline));
             return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -52,7 +65,7 @@ public class TaskController {
         try {
             Task updated = taskService.updateTask(taskId, updatedTask);
             return new ResponseEntity<>(updated, HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
