@@ -35,7 +35,7 @@ public class UserController {
     public ResponseEntity<AuthResponseDTO> loginUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
         try {
             User user = userService.login(userAndPasswordDTO.getName(), userAndPasswordDTO.getPassword());
-            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.createToken(user.getName()), user);
             return ResponseEntity.ok(authResponse);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -48,7 +48,7 @@ public class UserController {
     public ResponseEntity<AuthResponseDTO> registerUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
         try {
             User user = userService.register(userAndPasswordDTO.getName(), userAndPasswordDTO.getPassword());
-            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.createToken(user.getName()), user);
             return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
         } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
@@ -58,7 +58,7 @@ public class UserController {
     @PostMapping("/googleLogin")
     public ResponseEntity<AuthResponseDTO> googleLoginUser(@RequestBody UserAndEmailDTO userAndEmailDTO) {
         User user = userService.googleLogin(userAndEmailDTO.getName(), userAndEmailDTO.getEmail());
-        AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+        AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.createToken(user.getName()), user);
         return ResponseEntity.ok(authResponse);
     }
 
@@ -68,10 +68,10 @@ public class UserController {
         return new ResponseEntity<>(memberProjects, HttpStatus.OK);
     }
 
-    // @GetMapping("/all")
-    // public List<User> getAllUsers() {
-    //     return userService.getAllUsers();
-    // }
+//     @GetMapping("/all")
+//     public List<User> getAllUsers() {
+//         return userService.getAllUsers();
+//     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUser(@PathVariable Long userId) {

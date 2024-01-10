@@ -1,8 +1,10 @@
 package pw.pap.config;
 
-import io.jsonwebtoken.*;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.annotation.PostConstruct;
-//import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,9 +12,10 @@ import org.springframework.stereotype.Component;
 import pw.pap.model.User;
 import pw.pap.service.UserService;
 
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Date;
 
-//@RequiredArgsConstructor
 @Component
 public class UserAuthenticationProvider {
 
@@ -31,46 +34,29 @@ public class UserAuthenticationProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String generateToken(User user) {
+    public String createToken(String login) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + 3600000); // 1 hour
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
-
-        return Jwts.builder()
-                .setSubject(user.getName())
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .setClaims(claims)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+        return JWT.create()
+                .withSubject(login)
+                .withIssuedAt(now)
+                .withExpiresAt(validity)
+                .sign(algorithm);
     }
 
     public Authentication validateToken(String token) {
-        try {
-            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-            String username = claims.getSubject();
-            return new UsernamePasswordAuthenticationToken(username, null, null);
-        } catch (ExpiredJwtException | MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
-            // Handle exceptions or return null
-            return null;
-        }
-    }
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
-    public Authentication validateTokenStrongly(String token) {
-        try {
-            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-            String username = claims.getSubject();
+        JWTVerifier verifier = JWT.require(algorithm)
+                .build();
 
-            // Additional checks if needed
-            // For example, check if the user is still valid in the system (e.g., not disabled)
+        DecodedJWT decoded = verifier.verify(token);
 
-            return new UsernamePasswordAuthenticationToken(username, null, null);
-        } catch (ExpiredJwtException | MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
-            // Handle exceptions or return null
-            return null;
-        }
+        User user = userService.findByName(decoded.getSubject()).orElse(null);
+
+        return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
     }
 
 }

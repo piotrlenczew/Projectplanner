@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { googleLogout } from '@react-oauth/google';
 import './Style/HomePage.css';
 import default_profile_pic from "./Images/npc_face.jpg";
+import {setAuthHeader} from "../helpers/axios_helper";
 
 
 function HomePage({ user, onLogout }) {
@@ -12,6 +13,7 @@ function HomePage({ user, onLogout }) {
     const handleLogoutClick = () => {
         onLogout(); // Call the handleLogout function from props
         googleLogout();
+        setAuthHeader(null)
         navigate('/login'); // Navigate to LoginPage
         alert("User logged out");
     }

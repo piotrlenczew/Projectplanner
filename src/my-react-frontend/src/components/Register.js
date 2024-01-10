@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import {setAuthHeader} from "../helpers/axios_helper"; // Import useNavigate
 
 
 const Register = ({ onRegister }) => {
@@ -14,9 +15,11 @@ const Register = ({ onRegister }) => {
             .then(response => {
                 alert('User added successfully!'); // Notify user
                 onRegister(response.data);
+                setAuthHeader(response.data.token)
                 navigate('/home'); // Navigate to the HomePage
             })
             .catch(error => {
+                setAuthHeader(null)
                 if (error.response && error.response.status === 409) {
                     alert("User with this name exists");
                 } else {

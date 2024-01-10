@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { GoogleLogin } from '@react-oauth/google';
 import { FaUser, FaLock } from "react-icons/fa";
 import './Style/Login.css';
+import { setAuthHeader } from '../helpers/axios_helper';
 
 const clientId = "653829545632-s1tg9di96ernst657soqhvtdt37vssp8.apps.googleusercontent.com";
 
@@ -38,13 +39,16 @@ function Login({ onLogin }) {
                 if (response.data)
                 {
                     //alert(response.data.id)
+                    setAuthHeader(response.data.token)
                     onLogin(response.data); // Update App state if authentication is successful
                     navigate('/home'); // Navigate to HomePage
                 }
             } else {
+                setAuthHeader(null)
                 throw new Error('Authentication failed'); // Rzuć wyjątek, jeśli autoryzacja nie powiedzie się
             }
         } catch (error) {
+            setAuthHeader(null)
             console.error('Login error:', error);
             if (error.response && error.response.status === 404) {
                 setLoginError("User not found"); // Ustaw błąd dla błędnej nazwy użytkownika
@@ -76,13 +80,16 @@ function Login({ onLogin }) {
 
             const response2 = await axios.post("/api/users/googleLogin", requestBody);
             if (response2.status === 200 && response2.data) {
+                setAuthHeader(response2.data.token)
                 onLogin(response2.data); // Update App state if authentication is successful
             } else {
+                setAuthHeader(null)
                 throw new Error("Authentication failed");
             }
 
             navigate("/home");
         } catch (error) {
+            setAuthHeader(null)
             console.error("Error:", error);
         }
     };
