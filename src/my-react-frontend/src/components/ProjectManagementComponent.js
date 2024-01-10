@@ -1,27 +1,36 @@
 import React, {useState, useEffect} from "react";
 import axios from "axios";
 
-const ProjectManagementComponent = () => {
+const ProjectManagementComponent = ( {user}) => {
     const [projects, setProjects] = useState([]);
     const [newProjectName, setNewProjectName] = useState("");
-    const [newProjectOwnerId, setNewProjectOwnerId] = useState("");
 
     useEffect(() => {
-        axios.get("/api/projects/all")
+        axios.get(`/api/users/${user.id}/projects`)
             .then(response => {
                 setProjects(response.data);
             })
             .catch(error => console.error("API call error:", error));
-    }, []);
+    }, [user.id]);
 
     const handleAddProject = (e) => {
         e.preventDefault();
-        const newProject = {name: newProjectName, owner: {id: newProjectOwnerId}};
+        //alert(user.name);
+        //alert(newProjectName);
+        //alert(newProjectOwnerId);
+
+        const newProject = {name: newProjectName, owner: {id: user.id}};
         axios.post("/api/projects/add", newProject)
             .then(response => {
-                setProjects([...projects, response.data]);
+                //alert('Nie poszło');
+
+                const addedProject = {
+                    ...response.data,
+                    owner: user // Założenie, że obiekt 'user' zawiera pełne informacje o właścicielu
+                };
+
+                setProjects([...projects, addedProject]);
                 setNewProjectName("");    // Clear the input field
-                setNewProjectOwnerId(""); // Clear the input field
             })
             .catch(error => console.error("Error adding project:", error));
     };
@@ -42,9 +51,16 @@ const ProjectManagementComponent = () => {
                 {projects.map(project => (
                     <div key={project.id} className="mylist-entry" >
                         <span className="text-gray-800">
-                            <span className="font-bold">ID: {project.id}</span>, owner: {project.owner.name}
+                            <span className="font-bold">{project.name}</span>
+                            <span className="ml-2">id: {project.id}</span>
+                            <span className="ml-2">owner: {project.owner.name}</span>
+                            <span className="ml-2">
+                                <span>members: </span>
+                                {project.members.map((member, index) => (
+                                     <span>{member.name + (index + 1 !== project.members.length ? ', ' : '')}</span>
+                                ))}
+                            </span>
                         </span>
-                        <span className="text-gray-800 ml-2 mr-2">{project.name}</span>
                         <button
                             onClick={() => handleDeleteProject(project.id)}
                             className="mybutton"
@@ -55,27 +71,22 @@ const ProjectManagementComponent = () => {
                 ))}
             </div>
             {/* Form for adding a new project */}
-            <form onSubmit={handleAddProject} className="mb-4">
-                <input
-                    type="text"
-                    value={newProjectName}
-                    onChange={(e) => setNewProjectName(e.target.value)}
-                    placeholder="Name"
-                    className="myinput"
-                />
-                <input
-                    type="text"
-                    value={newProjectOwnerId}
-                    onChange={(e) => setNewProjectOwnerId(e.target.value)}
-                    placeholder="Owner ID"
-                    className="myinput"
-                />
-                <button
-                    type="submit"
-                    className="mybutton"
-                    >
-                    Add project
-                </button>
+            <form onSubmit={handleAddProject} className="w-full">
+                <div className="flex">
+                    <input
+                        type="text"
+                        value={newProjectName}
+                        onChange={(e) => setNewProjectName(e.target.value)}
+                        placeholder="Name"
+                        className="myinput mr-2 grow"
+                    />
+                    <button
+                        type="submit"
+                        className="mybutton"
+                        >
+                        Add project
+                    </button>
+                </div>
             </form>
         </div>
     );

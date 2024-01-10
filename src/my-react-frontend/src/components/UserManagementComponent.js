@@ -59,14 +59,14 @@ const UserManagementComponent = () => {
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                     placeholder="Name"
-                    className="myinput"
+                    className="myinput mr-2"
                 />
                 <input
                     type="text"
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                     placeholder="Password"
-                    className="myinput"
+                    className="myinput mr-2"
                 />
                 <button
                     type="submit"

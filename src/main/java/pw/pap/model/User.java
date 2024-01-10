@@ -33,18 +33,6 @@ public class User {
     @Column(name = "account_creation_date", nullable = false, updatable = false)
     private LocalDateTime accountCreationDate;
 
-    @OneToMany(mappedBy = "owner")
-    private List<Project> ownedProjects = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "members")
-    private List<Project> memberOfProjects = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "assignees")
-    private List<Task> assignedTasks = new ArrayList<>();
-
-    @OneToMany(mappedBy = "creator")
-    private List<Task> createdTasks = new ArrayList<>();
-
     public User() { }
 
     public User(String name, LocalDateTime accountCreationDate) {
@@ -122,37 +110,5 @@ public class User {
 
     public void setAccountCreationDate(LocalDateTime accountCreationDate) {
         this.accountCreationDate = accountCreationDate;
-    }
-
-    public List<Project> getOwnedProjects() {
-        return ownedProjects;
-    }
-
-    public void setOwnedProjects(List<Project> ownedProjects) {
-        this.ownedProjects = ownedProjects;
-    }
-
-    public List<Project> getMemberOfProjects() {
-        return memberOfProjects;
-    }
-
-    public void setMemberOfProjects(List<Project> memberOfProjects) {
-        this.memberOfProjects = memberOfProjects;
-    }
-
-    public List<Task> getAssignedTasks() {
-        return assignedTasks;
-    }
-
-    public void setAssignedTasks(List<Task> assignedTasks) {
-        this.assignedTasks = assignedTasks;
-    }
-
-    public List<Task> getCreatedTasks() {
-        return createdTasks;
-    }
-
-    public void setCreatedTasks(List<Task> createdTasks) {
-        this.createdTasks = createdTasks;
     }
 }
