@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import pw.pap.api.dto.AuthResponseDTO;
 import pw.pap.api.dto.UserAndEmailDTO;
+import pw.pap.config.UserAuthenticationProvider;
 import pw.pap.model.Project;
 import pw.pap.model.User;
 import pw.pap.service.UserService;
@@ -22,12 +24,19 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    private final UserAuthenticationProvider userAuthenticationProvider;
+
+    public UserController(UserAuthenticationProvider userAuthenticationProvider) {
+        this.userAuthenticationProvider = userAuthenticationProvider;
+    }
+
 
     @PostMapping("/login")
-    public ResponseEntity<User> loginUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
+    public ResponseEntity<AuthResponseDTO> loginUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
         try {
             User user = userService.login(userAndPasswordDTO.getName(), userAndPasswordDTO.getPassword());
-            return ResponseEntity.ok(user);
+            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+            return ResponseEntity.ok(authResponse);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (IllegalArgumentException e) {
@@ -36,19 +45,21 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
+    public ResponseEntity<AuthResponseDTO> registerUser(@RequestBody UserAndPasswordDTO userAndPasswordDTO) {
         try {
             User user = userService.register(userAndPasswordDTO.getName(), userAndPasswordDTO.getPassword());
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+            AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
         } catch (EntityExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
     }
 
     @PostMapping("/googleLogin")
-    public ResponseEntity<User> googleLoginUser(@RequestBody UserAndEmailDTO userAndEmailDTO) {
+    public ResponseEntity<AuthResponseDTO> googleLoginUser(@RequestBody UserAndEmailDTO userAndEmailDTO) {
         User user = userService.googleLogin(userAndEmailDTO.getName(), userAndEmailDTO.getEmail());
-        return ResponseEntity.ok(user);
+        AuthResponseDTO authResponse = new AuthResponseDTO(userAuthenticationProvider.generateToken(user), user);
+        return ResponseEntity.ok(authResponse);
     }
 
     @GetMapping("/{userId}/projects")
