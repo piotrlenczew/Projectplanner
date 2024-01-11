@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "Projects")
@@ -37,6 +39,7 @@ public class Project {
         joinColumns = {@JoinColumn(name = "project_id")},
         inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
+    @JsonIgnore
     private List<User> members = new ArrayList<>();
 
     public Project() { }
